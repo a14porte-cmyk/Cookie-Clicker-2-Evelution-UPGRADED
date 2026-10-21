@@ -1,0 +1,2951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Cookie Clicker 2: Evolution Protocol</title>
+<style>
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+
+
+html, body {
+width: 100%;
+height: 100%;
+overflow: hidden;
+font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+background: radial-gradient(circle at top, #050515 0, #020208 50%, #000 100%);
+color: #e0f7fa;
+}
+
+
+body {
+display: flex;
+align-items: stretch;
+justify-content: stretch;
+}
+
+
+/* ===== COSMIC PORTAL LOGIN OVERLAY ===== */
+
+
+#portal-overlay {
+position: fixed;
+inset: 0;
+background: radial-gradient(circle at center, #050515 0, #000 60%, #000 100%);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 9999;
+overflow: hidden;
+}
+
+
+#portal-bg-stars {
+position: absolute;
+inset: -20%;
+background:
+radial-gradient(circle at 10% 20%, rgba(120, 144, 255, 0.25) 0, transparent 50%),
+radial-gradient(circle at 80% 10%, rgba(0, 229, 255, 0.25) 0, transparent 55%),
+radial-gradient(circle at 20% 80%, rgba(244, 143, 177, 0.25) 0, transparent 55%),
+radial-gradient(circle at 70% 75%, rgba(129, 199, 132, 0.25) 0, transparent 55%),
+radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.12) 0, transparent 60%);
+opacity: 0.7;
+filter: blur(2px);
+pointer-events: none;
+}
+
+
+#portal-canvas-container {
+position: relative;
+width: min(520px, 80vw);
+height: min(520px, 80vw);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+
+#portal-canvas {
+width: 100%;
+height: 100%;
+border-radius: 50%;
+overflow: hidden;
+box-shadow:
+0 0 40px rgba(0, 229, 255, 0.7),
+0 0 90px rgba(124, 77, 255, 0.7);
+background: radial-gradient(circle at center, #050515 0, #000 70%);
+}
+
+
+/* Fallback if WebGL fails */
+.portal-fallback {
+background:
+radial-gradient(circle at 30% 30%, #80deea 0, transparent 55%),
+radial-gradient(circle at 70% 70%, #7c4dff 0, transparent 55%),
+radial-gradient(circle at center, #000 0, #000 60%);
+}
+
+
+#portal-inner-ui {
+position: absolute;
+inset: 0;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+pointer-events: none;
+}
+
+
+#portal-title {
+font-size: 18px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: #e1f5fe;
+text-shadow: 0 0 12px rgba(224, 247, 250, 0.9);
+margin-bottom: 10px;
+}
+
+
+#portal-subtitle {
+font-size: 12px;
+opacity: 0.85;
+margin-bottom: 18px;
+text-align: center;
+max-width: 260px;
+}
+
+
+#portal-input-wrapper {
+pointer-events: auto;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 8px;
+}
+
+
+#portal-label {
+font-size: 11px;
+letter-spacing: 1px;
+text-transform: uppercase;
+opacity: 0.8;
+}
+
+
+#player-name-input {
+margin-top: 4px;
+padding: 8px 12px;
+border-radius: 999px;
+border: 1px solid rgba(0, 229, 255, 0.8);
+background: rgba(0, 0, 0, 0.7);
+color: #e0f7fa;
+outline: none;
+min-width: 220px;
+text-align: center;
+font-size: 13px;
+box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
+transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+
+#player-name-input:focus {
+border-color: rgba(255, 255, 255, 0.9);
+box-shadow:
+0 0 18px rgba(0, 229, 255, 0.9),
+0 0 30px rgba(124, 77, 255, 0.8);
+transform: translateY(-1px);
+}
+
+
+#portal-enter-btn {
+margin-top: 6px;
+padding: 7px 18px;
+border-radius: 999px;
+border: 1px solid rgba(0, 229, 255, 0.9);
+background: linear-gradient(90deg, #00e5ff, #7c4dff);
+color: #000;
+font-size: 12px;
+font-weight: 700;
+cursor: pointer;
+text-transform: uppercase;
+letter-spacing: 1px;
+box-shadow:
+0 0 14px rgba(0, 229, 255, 0.9),
+0 0 26px rgba(124, 77, 255, 0.9);
+transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+}
+
+
+#portal-enter-btn:hover {
+transform: translateY(-1px);
+filter: brightness(1.05);
+box-shadow:
+0 0 20px rgba(0, 229, 255, 1),
+0 0 34px rgba(124, 77, 255, 1);
+}
+
+
+#portal-enter-btn:active {
+transform: translateY(0);
+filter: brightness(0.96);
+}
+
+
+#portal-status {
+margin-top: 8px;
+font-size: 11px;
+opacity: 0.8;
+text-align: center;
+max-width: 260px;
+}
+
+
+.portal-status-admin {
+color: #ffeb3b;
+text-shadow: 0 0 10px rgba(255, 235, 59, 0.9);
+}
+
+
+.portal-status-error {
+color: #ff8a80;
+}
+
+
+/* Portal evolution color states (used by JS) */
+
+
+.portal-tier-1 {
+box-shadow:
+0 0 30px rgba(255, 183, 77, 0.7),
+0 0 70px rgba(255, 111, 0, 0.6);
+}
+
+
+.portal-tier-2 {
+box-shadow:
+0 0 34px rgba(255, 204, 128, 0.8),
+0 0 80px rgba(255, 171, 64, 0.7);
+}
+
+
+.portal-tier-3 {
+box-shadow:
+0 0 40px rgba(0, 229, 255, 0.9),
+0 0 90px rgba(124, 77, 255, 0.9);
+}
+
+
+.portal-tier-4 {
+box-shadow:
+0 0 40px rgba(244, 143, 177, 0.9),
+0 0 90px rgba(0, 229, 255, 0.9);
+}
+
+
+.portal-tier-5 {
+box-shadow:
+0 0 40px rgba(171, 71, 188, 0.9),
+0 0 100px rgba(79, 195, 247, 0.9);
+}
+
+
+.portal-tier-6 {
+box-shadow:
+0 0 40px rgba(123, 31, 162, 0.9),
+0 0 110px rgba(244, 67, 54, 0.9);
+}
+
+
+.portal-tier-7 {
+box-shadow:
+0 0 40px rgba(255, 241, 118, 0.9),
+0 0 110px rgba(255, 213, 79, 0.9);
+}
+
+
+.portal-tier-8 {
+box-shadow:
+0 0 50px rgba(255, 255, 255, 1),
+0 0 140px rgba(255, 64, 129, 1),
+0 0 180px rgba(0, 229, 255, 1);
+}
+
+
+.portal-admin-flash {
+animation: portalAdminFlash 1.4s ease-out;
+}
+
+
+@keyframes portalAdminFlash {
+0% {
+filter: brightness(1);
+}
+20% {
+filter: brightness(2.2);
+}
+50% {
+filter: brightness(1.4);
+}
+100% {
+filter: brightness(1);
+}
+}
+
+
+.portal-fade-out {
+animation: portalFadeOut 0.9s ease forwards;
+}
+
+
+@keyframes portalFadeOut {
+0% {
+opacity: 1;
+transform: scale(1);
+}
+100% {
+opacity: 0;
+transform: scale(1.05);
+}
+}
+
+
+/* ===== MAIN GAME LAYOUT ===== */
+
+
+#game-root {
+position: relative;
+width: 100%;
+height: 100%;
+display: none; /* shown after login */
+}
+
+
+#game-bg {
+position: absolute;
+inset: 0;
+background:
+radial-gradient(circle at top, #1b1b3a 0, #050510 55%, #000 100%);
+overflow: hidden;
+z-index: 0;
+}
+
+
+#game-bg-stars {
+position: absolute;
+inset: -10%;
+background:
+radial-gradient(circle at 10% 20%, rgba(120, 144, 255, 0.25) 0, transparent 50%),
+radial-gradient(circle at 80% 10%, rgba(0, 229, 255, 0.25) 0, transparent 55%),
+radial-gradient(circle at 20% 80%, rgba(244, 143, 177, 0.25) 0, transparent 55%),
+radial-gradient(circle at 70% 75%, rgba(129, 199, 132, 0.25) 0, transparent 55%),
+radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.12) 0, transparent 60%);
+opacity: 0.6;
+filter: blur(1px);
+}
+
+
+#game-grid {
+position: relative;
+z-index: 1;
+display: grid;
+grid-template-columns: 1.4fr 1.2fr 1.4fr;
+grid-template-rows: auto 1fr;
+height: 100%;
+gap: 8px;
+padding: 8px;
+}
+
+
+#header {
+grid-column: 1 / 4;
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 6px 10px;
+background: linear-gradient(90deg, #00bcd4, #7c4dff);
+color: #000;
+border-radius: 8px;
+box-shadow: 0 0 18px rgba(0, 188, 212, 0.6);
+}
+
+
+#title {
+font-size: 20px;
+font-weight: 700;
+letter-spacing: 1px;
+text-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+
+#stats {
+display: flex;
+gap: 16px;
+font-size: 13px;
+align-items: center;
+}
+
+
+.stat-label {
+opacity: 0.8;
+}
+
+
+.stat-value {
+font-weight: 700;
+}
+
+
+#player-name-display {
+font-size: 12px;
+opacity: 0.9;
+}
+
+
+#music-mode-display {
+font-size: 11px;
+opacity: 0.8;
+}
+
+
+#left, #center, #right {
+background: rgba(10, 10, 30, 0.9);
+border-radius: 10px;
+padding: 10px;
+box-shadow: 0 0 18px rgba(0, 255, 255, 0.08);
+overflow: hidden;
+display: flex;
+flex-direction: column;
+min-width: 0;
+}
+
+
+/* LEFT: Cookie + evolution */
+
+
+#cookie-area {
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+position: relative;
+}
+
+
+#cookie-evolution-wrapper {
+position: relative;
+width: 260px;
+height: 260px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+
+#cookie {
+width: 220px;
+height: 220px;
+border-radius: 50%;
+background: radial-gradient(circle at 30% 30%, #ffe082 0, #ffb300 40%, #ff6f00 100%);
+box-shadow:
+0 0 40px rgba(255, 193, 7, 0.8),
+0 0 80px rgba(255, 111, 0, 0.6);
+border: 4px solid rgba(255, 255, 255, 0.2);
+position: relative;
+cursor: pointer;
+transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+
+
+#cookie::before,
+#cookie::after {
+content: "";
+position: absolute;
+border-radius: 50%;
+background: radial-gradient(circle, #4e342e 0, #3e2723 60%, transparent 100%);
+opacity: 0.9;
+}
+
+
+#cookie::before {
+width: 40px;
+height: 40px;
+top: 40px;
+left: 60px;
+}
+
+
+#cookie::after {
+width: 34px;
+height: 34px;
+top: 120px;
+right: 50px;
+}
+
+
+.chip {
+position: absolute;
+width: 30px;
+height: 30px;
+border-radius: 50%;
+background: radial-gradient(circle, #4e342e 0, #3e2723 60%, transparent 100%);
+opacity: 0.9;
+}
+
+
+.chip.c1 { top: 80px; left: 130px; }
+.chip.c2 { top: 130px; left: 90px; }
+.chip.c3 { top: 60px; right: 70px; }
+
+
+#cookie:active {
+transform: scale(0.94);
+box-shadow:
+0 0 20px rgba(255, 193, 7, 0.9),
+0 0 50px rgba(255, 111, 0, 0.8);
+}
+
+
+/* Evolution aura layers (JS will toggle classes) */
+
+
+.evo-aura {
+position: absolute;
+inset: -10%;
+border-radius: 50%;
+pointer-events: none;
+mix-blend-mode: screen;
+opacity: 0;
+transition: opacity 0.4s ease;
+}
+
+
+.evo-aura.visible {
+opacity: 1;
+}
+
+
+.evo-tier-1 {
+background: radial-gradient(circle, rgba(255, 183, 77, 0.5) 0, transparent 60%);
+}
+
+
+.evo-tier-2 {
+background: radial-gradient(circle, rgba(255, 213, 79, 0.6) 0, transparent 65%);
+}
+
+
+.evo-tier-3 {
+background:
+radial-gradient(circle, rgba(0, 229, 255, 0.7) 0, transparent 60%),
+radial-gradient(circle at 20% 80%, rgba(124, 77, 255, 0.6) 0, transparent 70%);
+animation: evoNeonPulse 2.4s ease-in-out infinite;
+}
+
+
+.evo-tier-4 {
+background:
+radial-gradient(circle, rgba(244, 143, 177, 0.7) 0, transparent 60%),
+radial-gradient(circle at 80% 20%, rgba(0, 229, 255, 0.7) 0, transparent 70%);
+animation: evoQuantumGlitch 2.2s ease-in-out infinite;
+}
+
+
+.evo-tier-5 {
+background:
+radial-gradient(circle, rgba(171, 71, 188, 0.7) 0, transparent 60%),
+radial-gradient(circle at 10% 90%, rgba(79, 195, 247, 0.7) 0, transparent 70%);
+animation: evoGalacticOrbit 6s linear infinite;
+}
+
+
+.evo-tier-6 {
+background:
+radial-gradient(circle, rgba(123, 31, 162, 0.9) 0, transparent 55%),
+radial-gradient(circle at 50% 50%, rgba(244, 67, 54, 0.9) 0, transparent 70%);
+animation: evoSingularity 4.5s ease-in-out infinite;
+}
+
+
+.evo-tier-7 {
+background:
+radial-gradient(circle, rgba(255, 241, 118, 0.9) 0, transparent 55%),
+radial-gradient(circle at 30% 70%, rgba(255, 213, 79, 0.9) 0, transparent 70%);
+animation: evoGodFractal 5s ease-in-out infinite;
+}
+
+
+.evo-tier-8 {
+background:
+conic-gradient(from 0deg,
+rgba(255, 64, 129, 0.9),
+rgba(0, 229, 255, 0.9),
+rgba(255, 241, 118, 0.9),
+rgba(171, 71, 188, 0.9),
+rgba(255, 64, 129, 0.9));
+animation: evoOmega 4s linear infinite;
+}
+
+
+@keyframes evoNeonPulse {
+0%, 100% { transform: scale(1); opacity: 0.7; }
+50% { transform: scale(1.08); opacity: 1; }
+}
+
+
+@keyframes evoQuantumGlitch {
+0%, 100% { transform: translate(0, 0); filter: hue-rotate(0deg); }
+25% { transform: translate(2px, -2px); filter: hue-rotate(20deg); }
+50% { transform: translate(-2px, 2px); filter: hue-rotate(-20deg); }
+75% { transform: translate(1px, -1px); filter: hue-rotate(10deg); }
+}
+
+
+@keyframes evoGalacticOrbit {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+
+@keyframes evoSingularity {
+0%, 100% { transform: scale(1); filter: blur(0px); }
+50% { transform: scale(0.96); filter: blur(2px); }
+}
+
+
+@keyframes evoGodFractal {
+0%, 100% { transform: scale(1); filter: hue-rotate(0deg); }
+50% { transform: scale(1.05); filter: hue-rotate(40deg); }
+}
+
+
+@keyframes evoOmega {
+0% { transform: rotate(0deg); filter: brightness(1); }
+50% { transform: rotate(180deg); filter: brightness(1.3); }
+100% { transform: rotate(360deg); filter: brightness(1); }
+}
+
+
+#floating-clicks {
+position: absolute;
+inset: 0;
+pointer-events: none;
+overflow: visible;
+}
+
+
+.float-text {
+position: absolute;
+color: #ffecb3;
+font-size: 14px;
+text-shadow: 0 0 6px rgba(255, 236, 179, 0.9);
+animation: floatUp 0.7s ease-out forwards;
+}
+
+
+@keyframes floatUp {
+0% { transform: translateY(0); opacity: 1; }
+100% { transform: translateY(-40px); opacity: 0; }
+}
+
+
+#cookie-count {
+margin-top: 16px;
+font-size: 18px;
+text-align: center;
+}
+
+
+#cookie-count span {
+font-weight: 700;
+color: #ffecb3;
+text-shadow: 0 0 8px rgba(255, 236, 179, 0.7);
+}
+
+
+#evolution-label {
+margin-top: 4px;
+font-size: 12px;
+opacity: 0.85;
+}
+
+
+#combo-bar {
+margin-top: 10px;
+width: 80%;
+height: 10px;
+border-radius: 999px;
+background: rgba(255, 255, 255, 0.06);
+overflow: hidden;
+position: relative;
+}
+
+
+#combo-fill {
+height: 100%;
+width: 0%;
+background: linear-gradient(90deg, #00e5ff, #76ff03);
+box-shadow: 0 0 12px rgba(0, 229, 255, 0.8);
+transition: width 0.1s linear;
+}
+
+
+#combo-label {
+margin-top: 4px;
+font-size: 12px;
+opacity: 0.8;
+}
+
+
+#combo-text {
+font-weight: 700;
+color: #b2ff59;
+}
+
+
+/* CENTER: Upgrades */
+
+
+#center-title {
+font-size: 14px;
+margin-bottom: 6px;
+text-transform: uppercase;
+letter-spacing: 1px;
+color: #80deea;
+}
+
+
+#upgrades {
+flex: 1;
+overflow-y: auto;
+padding-right: 4px;
+}
+
+
+.upgrade {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 6px 8px;
+margin-bottom: 6px;
+border-radius: 6px;
+background: linear-gradient(90deg, rgba(0, 188, 212, 0.12), rgba(124, 77, 255, 0.12));
+border: 1px solid rgba(0, 188, 212, 0.3);
+cursor: pointer;
+transition: background 0.1s ease, transform 0.08s ease, box-shadow 0.1s ease;
+font-size: 12px;
+}
+
+
+.upgrade:hover {
+background: linear-gradient(90deg, rgba(0, 188, 212, 0.25), rgba(124, 77, 255, 0.25));
+box-shadow: 0 0 10px rgba(0, 188, 212, 0.4);
+transform: translateY(-1px);
+}
+
+
+.upgrade.disabled {
+opacity: 0.4;
+cursor: default;
+box-shadow: none;
+}
+
+
+.upgrade-left {
+display: flex;
+flex-direction: column;
+gap: 2px;
+}
+
+
+.upgrade-name {
+font-weight: 600;
+color: #e1f5fe;
+}
+
+
+.upgrade-desc {
+font-size: 11px;
+opacity: 0.8;
+}
+
+
+.upgrade-right {
+text-align: right;
+font-size: 11px;
+}
+
+
+.upgrade-cost {
+color: #ffecb3;
+}
+
+
+.upgrade-meta {
+opacity: 0.7;
+}
+
+
+/* RIGHT: Tabs + content */
+
+
+#right-tabs {
+display: flex;
+gap: 4px;
+margin-bottom: 6px;
+}
+
+
+.tab-btn {
+flex: 1;
+padding: 4px 0;
+font-size: 11px;
+border-radius: 999px;
+border: 1px solid rgba(0, 188, 212, 0.5);
+background: rgba(0, 0, 0, 0.4);
+color: #b2ebf2;
+cursor: pointer;
+transition: background 0.1s ease, color 0.1s ease, box-shadow 0.1s ease;
+}
+
+
+.tab-btn.active {
+background: linear-gradient(90deg, #00bcd4, #7c4dff);
+color: #000;
+box-shadow: 0 0 10px rgba(0, 188, 212, 0.7);
+}
+
+
+#right-content {
+flex: 1;
+overflow-y: auto;
+padding-right: 4px;
+font-size: 12px;
+}
+
+#right-content input, #right-content select {
+box-sizing: border-box;
+width: 100%;
+margin: 4px 0 8px;
+padding: 7px 9px;
+background: rgba(3, 8, 22, 0.92);
+color: #e0f7fa;
+border: 1px solid rgba(0, 188, 212, 0.55);
+border-radius: 8px;
+font: inherit;
+}
+.trading-card {
+background: rgba(10, 20, 44, 0.8);
+border: 1px solid rgba(0, 188, 212, 0.3);
+border-radius: 10px;
+padding: 10px;
+margin: 8px 0;
+}
+.trading-status { color: #80deea; font-size: 11px; line-height: 1.5; }
+
+
+
+.section-title {
+font-size: 13px;
+margin-bottom: 4px;
+color: #80deea;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+
+.generator {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 6px 8px;
+margin-bottom: 6px;
+border-radius: 6px;
+background: linear-gradient(90deg, rgba(0, 188, 212, 0.12), rgba(0, 150, 136, 0.12));
+border: 1px solid rgba(0, 188, 212, 0.3);
+cursor: pointer;
+transition: background 0.1s ease, transform 0.08s ease, box-shadow 0.1s ease;
+}
+
+
+.generator:hover {
+background: linear-gradient(90deg, rgba(0, 188, 212, 0.25), rgba(0, 150, 136, 0.25));
+box-shadow: 0 0 10px rgba(0, 188, 212, 0.4);
+transform: translateY(-1px);
+}
+
+
+.generator.disabled {
+opacity: 0.4;
+cursor: default;
+box-shadow: none;
+}
+
+
+.generator-left {
+display: flex;
+flex-direction: column;
+gap: 2px;
+}
+
+
+.generator-name {
+font-weight: 600;
+color: #e1f5fe;
+}
+
+
+.generator-desc {
+font-size: 11px;
+opacity: 0.8;
+}
+
+
+.generator-right {
+text-align: right;
+font-size: 11px;
+}
+
+
+.generator-cost {
+color: #ffecb3;
+}
+
+
+.generator-meta {
+opacity: 0.7;
+}
+
+
+#prestige-info {
+margin-top: 6px;
+padding: 6px 8px;
+border-radius: 6px;
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.08);
+font-size: 11px;
+}
+
+
+#prestige-btn {
+margin-top: 6px;
+width: 100%;
+padding: 6px 0;
+border-radius: 999px;
+border: 1px solid rgba(255, 235, 59, 0.7);
+background: radial-gradient(circle at top, #fff176, #fbc02d);
+color: #000;
+font-size: 12px;
+font-weight: 700;
+cursor: pointer;
+box-shadow: 0 0 12px rgba(255, 235, 59, 0.7);
+transition: transform 0.08s ease, box-shadow 0.1s ease, filter 0.1s ease;
+}
+
+
+#prestige-btn:hover {
+transform: translateY(-1px);
+filter: brightness(1.05);
+box-shadow: 0 0 18px rgba(255, 235, 59, 0.9);
+}
+
+
+#prestige-btn:disabled {
+opacity: 0.4;
+cursor: default;
+box-shadow: none;
+}
+
+
+/* Scrollbars */
+
+
+#upgrades::-webkit-scrollbar,
+#right-content::-webkit-scrollbar {
+width: 6px;
+}
+
+
+#upgrades::-webkit-scrollbar-thumb,
+#right-content::-webkit-scrollbar-thumb {
+background: rgba(0, 188, 212, 0.5);
+border-radius: 999px;
+}
+
+
+/* Responsive */
+
+
+@media (max-width: 1000px) {
+#game-grid {
+grid-template-columns: 1fr;
+grid-template-rows: auto auto auto auto;
+height: auto;
+}
+#left, #center, #right {
+height: 60vh;
+}
+}
+</style>
+</head>
+<body>
+
+
+<!-- ===== COSMIC PORTAL LOGIN ===== -->
+<div id="portal-overlay">
+<div id="portal-bg-stars"></div>
+<div id="portal-canvas-container">
+<canvas id="portal-canvas"></canvas>
+<div id="portal-inner-ui">
+<div id="portal-title">COOKIE CLICKER 2: EVOLUTION PROTOCOL</div>
+<div id="portal-subtitle">
+IDENTIFY YOUR COOKIE SOUL TO ENTER THE NEO‑BAKERY.
+THE PORTAL RESPONDS TO YOUR EVOLUTION.
+</div>
+<div id="portal-input-wrapper">
+<div id="portal-label">ENTER NAME</div>
+<input id="player-name-input" type="text" maxlength="24" placeholder="Type your name..." />
+<button id="portal-enter-btn">ENTER THE PORTAL</button>
+<div id="portal-status"></div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- ===== MAIN GAME ROOT ===== -->
+<div id="game-root">
+<div id="game-bg">
+<div id="game-bg-stars"></div>
+</div>
+<div id="game-grid">
+<div id="header">
+<div id="title">COOKIE CLICKER 2: EVOLUTION PROTOCOL</div>
+<div id="stats">
+<div><span class="stat-label">Cookies:</span> <span class="stat-value" id="stat-cookies">0</span></div>
+<div><span class="stat-label">CPS:</span> <span class="stat-value" id="stat-cps">0</span></div>
+<div><span class="stat-label">Combo:</span> <span class="stat-value" id="stat-combo">x1.0</span></div>
+<div><span class="stat-label">Prestige:</span> <span class="stat-value" id="stat-prestige">0</span></div>
+<div id="player-name-display"></div>
+<div id="music-mode-display"></div>
+</div>
+</div>
+
+
+<div id="left">
+<div id="cookie-area">
+<div id="cookie-evolution-wrapper">
+<div class="evo-aura evo-tier-1" id="evo-tier-1"></div>
+<div class="evo-aura evo-tier-2" id="evo-tier-2"></div>
+<div class="evo-aura evo-tier-3" id="evo-tier-3"></div>
+<div class="evo-aura evo-tier-4" id="evo-tier-4"></div>
+<div class="evo-aura evo-tier-5" id="evo-tier-5"></div>
+<div class="evo-aura evo-tier-6" id="evo-tier-6"></div>
+<div class="evo-aura evo-tier-7" id="evo-tier-7"></div>
+<div class="evo-aura evo-tier-8" id="evo-tier-8"></div>
+
+
+<div id="cookie">
+<div class="chip c1"></div>
+<div class="chip c2"></div>
+<div class="chip c3"></div>
+</div>
+<div id="floating-clicks"></div>
+</div>
+
+
+<div id="cookie-count">
+<div><span id="cookie-amount">0</span> <span>Neo‑Cookies</span></div>
+<div id="evolution-label">Tier 1 — Crumb</div>
+</div>
+
+
+<div id="combo-bar">
+<div id="combo-fill"></div>
+</div>
+<div id="combo-label">Combo: <span id="combo-text">x1.0</span> — keep clicking to charge!</div>
+</div>
+</div>
+
+
+<div id="center">
+<div id="center-title">Upgrades & Enhancements</div>
+<div id="upgrades"></div>
+</div>
+
+
+<div id="right">
+<div id="right-tabs">
+<button class="tab-btn active" data-tab="generators">Bots & Factories</button>
+<button class="tab-btn" data-tab="research">Research Lab</button>
+<button class="tab-btn" data-tab="prestige">Prestige</button>
+<button class="tab-btn" data-tab="trading">Trading</button>
+<button class="tab-btn" data-tab="admin" id="admin-tab" style="display:none;">Admin</button>
+</div>
+<div id="right-content"></div>
+</div>
+</div>
+</div>
+
+
+<!-- PART 2 & 3 SCRIPTS WILL BE APPENDED BELOW -->
+<script>
+// Placeholder so the file is valid before adding Part 2 & 3.
+</script>
+
+
+</body>
+</html>
+<script>
+/* ============================
+PART 2: COSMIC PORTAL WEBGL
+============================ */
+
+
+// We'll attach everything to window.Game later in Part 3
+window.Game = window.Game || {};
+const Game = window.Game;
+
+
+// ---------- WebGL Portal Setup ----------
+
+
+(function initPortalWebGL() {
+const canvas = document.getElementById("portal-canvas");
+if (!canvas) return;
+
+
+let gl = canvas.getContext("webgl");
+if (!gl) {
+// Fallback: just show a static gradient
+canvas.classList.add("portal-fallback");
+console.warn("WebGL not supported, using fallback portal.");
+return;
+}
+
+
+// Resize canvas to display size
+function resizeCanvas() {
+const rect = canvas.getBoundingClientRect();
+const dpr = window.devicePixelRatio || 1;
+canvas.width = rect.width * dpr;
+canvas.height = rect.height * dpr;
+gl.viewport(0, 0, canvas.width, canvas.height);
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+
+// Simple fragment shader: swirling cosmic vortex with color control
+const vertexSrc = `
+attribute vec2 a_position;
+varying vec2 v_uv;
+void main() {
+v_uv = (a_position + 1.0) * 0.5;
+gl_Position = vec4(a_position, 0.0, 1.0);
+}
+`;
+
+
+const fragmentSrc = `
+precision mediump float;
+varying vec2 v_uv;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec3 u_colorA;
+uniform vec3 u_colorB;
+uniform vec3 u_colorC;
+
+
+// Simple hash for star noise
+float hash(vec2 p) {
+p = fract(p * vec2(123.34, 345.45));
+p += dot(p, p + 34.345);
+return fract(p.x * p.y);
+}
+
+
+void main() {
+vec2 uv = v_uv;
+vec2 p = (uv - 0.5) * 2.0;
+float r = length(p);
+float angle = atan(p.y, p.x);
+
+
+// Swirl
+float t = u_time * 0.25;
+float swirl = angle + t * 2.0 + r * 4.0;
+
+
+// Base vortex color
+float vortex = smoothstep(1.0, 0.0, r * 1.2);
+float ring = sin(swirl * 3.0 + r * 10.0) * 0.5 + 0.5;
+
+
+vec3 col = mix(u_colorA, u_colorB, ring);
+col = mix(col, u_colorC, vortex);
+
+
+// Stars
+vec2 starUV = uv * 8.0;
+float star = step(0.995, hash(floor(starUV * 80.0)));
+col += vec3(star) * 0.8;
+
+
+// Darken edges
+col *= smoothstep(1.2, 0.2, r);
+
+
+gl_FragColor = vec4(col, 1.0);
+}
+`;
+
+
+function createShader(type, src) {
+const shader = gl.createShader(type);
+gl.shaderSource(shader, src);
+gl.compileShader(shader);
+if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+console.error("Shader compile error:", gl.getShaderInfoLog(shader));
+gl.deleteShader(shader);
+return null;
+}
+return shader;
+}
+
+
+const vs = createShader(gl.VERTEX_SHADER, vertexSrc);
+const fs = createShader(gl.FRAGMENT_SHADER, fragmentSrc);
+if (!vs || !fs) {
+canvas.classList.add("portal-fallback");
+return;
+}
+
+
+const program = gl.createProgram();
+gl.attachShader(program, vs);
+gl.attachShader(program, fs);
+gl.linkProgram(program);
+if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+console.error("Program link error:", gl.getProgramInfoLog(program));
+canvas.classList.add("portal-fallback");
+return;
+}
+
+
+gl.useProgram(program);
+
+
+const a_position = gl.getAttribLocation(program, "a_position");
+const u_time = gl.getUniformLocation(program, "u_time");
+const u_resolution = gl.getUniformLocation(program, "u_resolution");
+const u_colorA = gl.getUniformLocation(program, "u_colorA");
+const u_colorB = gl.getUniformLocation(program, "u_colorB");
+const u_colorC = gl.getUniformLocation(program, "u_colorC");
+
+
+const buffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+const vertices = new Float32Array([
+-1, -1,
+1, -1,
+-1, 1,
+-1, 1,
+1, -1,
+1, 1
+]);
+gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+
+gl.enableVertexAttribArray(a_position);
+gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
+
+
+// Default colors (Tier 1)
+let colorA = [1.0, 0.6, 0.2];
+let colorB = [1.0, 0.4, 0.0];
+let colorC = [0.9, 0.7, 0.3];
+
+
+// Expose a function to change colors based on evolution tier
+Game.setPortalColorsForTier = function(tier) {
+// Neon + cosmic palette progression
+if (tier <= 1) {
+colorA = [1.0, 0.6, 0.2];
+colorB = [1.0, 0.4, 0.0];
+colorC = [0.9, 0.7, 0.3];
+} else if (tier === 2) {
+colorA = [1.0, 0.8, 0.4];
+colorB = [1.0, 0.6, 0.2];
+colorC = [1.0, 0.9, 0.6];
+} else if (tier === 3) {
+colorA = [0.0, 0.9, 1.0];
+colorB = [0.5, 0.3, 1.0];
+colorC = [0.2, 0.9, 1.0];
+} else if (tier === 4) {
+colorA = [0.96, 0.56, 0.69];
+colorB = [0.0, 0.9, 1.0];
+colorC = [0.8, 0.4, 1.0];
+} else if (tier === 5) {
+colorA = [0.67, 0.28, 0.74];
+colorB = [0.31, 0.78, 0.97];
+colorC = [0.5, 0.2, 0.8];
+} else if (tier === 6) {
+colorA = [0.48, 0.12, 0.64];
+colorB = [0.96, 0.26, 0.21];
+colorC = [0.2, 0.0, 0.3];
+} else if (tier === 7) {
+colorA = [1.0, 0.95, 0.46];
+colorB = [1.0, 0.84, 0.31];
+colorC = [1.0, 1.0, 0.9];
+} else {
+// Omega: rainbow-ish
+colorA = [1.0, 0.25, 0.5];
+colorB = [0.0, 0.9, 1.0];
+colorC = [1.0, 0.95, 0.5];
+}
+};
+
+
+// Initial tier color
+Game.setPortalColorsForTier(1);
+
+
+let startTime = performance.now();
+
+
+function render(now) {
+const t = (now - startTime) / 1000;
+gl.viewport(0, 0, canvas.width, canvas.height);
+gl.clearColor(0, 0, 0, 1);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+gl.useProgram(program);
+gl.uniform1f(u_time, t);
+gl.uniform2f(u_resolution, canvas.width, canvas.height);
+gl.uniform3fv(u_colorA, colorA);
+gl.uniform3fv(u_colorB, colorB);
+gl.uniform3fv(u_colorC, colorC);
+
+
+gl.drawArrays(gl.TRIANGLES, 0, 6);
+requestAnimationFrame(render);
+}
+
+
+requestAnimationFrame(render);
+})();
+
+
+// ---------- Portal + Login Logic (no game yet) ----------
+
+
+(function initPortalLogic() {
+const overlay = document.getElementById("portal-overlay");
+const portalCanvas = document.getElementById("portal-canvas");
+const portalStatus = document.getElementById("portal-status");
+const nameInput = document.getElementById("player-name-input");
+const enterBtn = document.getElementById("portal-enter-btn");
+const gameRoot = document.getElementById("game-root");
+const playerNameDisplay = document.getElementById("player-name-display");
+const musicModeDisplay = document.getElementById("music-mode-display");
+const adminTab = document.getElementById("admin-tab");
+
+
+if (!overlay || !nameInput || !enterBtn || !gameRoot) return;
+
+
+Game.playerName = "";
+Game.isAdmin = false;
+Game.musicMode = "cosmic"; // default at portal
+Game.currentTier = 1;
+
+
+function setPortalTierClass(tier) {
+portalCanvas.classList.remove(
+"portal-tier-1","portal-tier-2","portal-tier-3","portal-tier-4",
+"portal-tier-5","portal-tier-6","portal-tier-7","portal-tier-8"
+);
+const cls = "portal-tier-" + Math.min(Math.max(tier, 1), 8);
+portalCanvas.classList.add(cls);
+if (typeof Game.setPortalColorsForTier === "function") {
+Game.setPortalColorsForTier(tier);
+}
+}
+
+
+// Expose for later when evolution changes
+Game.updatePortalForTier = function(tier) {
+Game.currentTier = tier;
+setPortalTierClass(tier);
+};
+
+
+setPortalTierClass(1);
+
+
+function setStatus(msg, type) {
+portalStatus.textContent = msg;
+portalStatus.classList.remove("portal-status-admin", "portal-status-error");
+if (type === "admin") portalStatus.classList.add("portal-status-admin");
+if (type === "error") portalStatus.classList.add("portal-status-error");
+}
+
+
+function finalizeLogin() {
+// Fade out portal, show game
+overlay.classList.add("portal-fade-out");
+setTimeout(() => {
+overlay.style.display = "none";
+gameRoot.style.display = "block";
+}, 900);
+
+
+// Show player name + music mode
+playerNameDisplay.textContent = "Player: " + Game.playerName;
+musicModeDisplay.textContent = "Music: " + (Game.musicMode === "cosmic" ? "Cosmic Ambient" : "Synthwave");
+
+
+// Admin tab visibility
+if (Game.isAdmin) {
+adminTab.style.display = "inline-block";
+}
+
+
+// Part 3 will hook in: Game.initGame()
+if (typeof Game.initGame === "function") {
+Game.initGame();
+}
+}
+
+
+function handleLogin() {
+const name = (nameInput.value || "").trim();
+if (!name) {
+setStatus("Name cannot be empty.", "error");
+return;
+}
+
+
+Game.playerName = name;
+Game.isAdmin = (name === "ILIKEBANANAS2345");
+
+
+if (Game.isAdmin) {
+setStatus("ADMIN SIGNATURE CONFIRMED. ACCESSING OMEGA BAKERY CORE...", "admin");
+portalCanvas.classList.add("portal-admin-flash");
+Game.updatePortalForTier(8);
+setTimeout(() => {
+finalizeLogin();
+}, 900);
+} else {
+setStatus("Welcome, " + name + ". Initializing evolution protocol...", null);
+Game.updatePortalForTier(1);
+setTimeout(() => {
+finalizeLogin();
+}, 700);
+}
+}
+
+
+enterBtn.addEventListener("click", handleLogin);
+nameInput.addEventListener("keydown", e => {
+if (e.key === "Enter") handleLogin();
+});
+
+
+// Focus input on load
+setTimeout(() => {
+nameInput.focus();
+}, 300);
+})();
+
+
+// PART 3 will add: evolution, clicking, upgrades, generators, research, prestige, admin panel, music, save/load, etc.
+</script>
+<script>
+/* ===========================================
+PART 3+4: CORE GAME + EXPANSION SYSTEMS
+=========================================== */
+
+
+(function() {
+const Game = window.Game || (window.Game = {});
+// Set this to your deployed HTTPS backend URL to enable online trade requests.
+// Example: Game.tradingApiBase = "https://your-api.example.com";
+Game.tradingApiBase = Game.tradingApiBase || ""; // Set to your deployed HTTPS API URL to enable real online trading.
+
+
+// ---------- DOM HOOKS ----------
+const cookieEl = document.getElementById("cookie");
+const floatingClicksEl = document.getElementById("floating-clicks");
+const cookieAmountEl = document.getElementById("cookie-amount");
+const evolutionLabelEl = document.getElementById("evolution-label");
+const statCookiesEl = document.getElementById("stat-cookies");
+const statCpsEl = document.getElementById("stat-cps");
+const statComboEl = document.getElementById("stat-combo");
+const statPrestigeEl = document.getElementById("stat-prestige");
+const comboFillEl = document.getElementById("combo-fill");
+const comboTextEl = document.getElementById("combo-text");
+const upgradesContainer = document.getElementById("upgrades");
+const rightContent = document.getElementById("right-content");
+const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
+const musicModeDisplay = document.getElementById("music-mode-display");
+const adminTab = document.getElementById("admin-tab");
+
+
+const evoAuras = [
+document.getElementById("evo-tier-1"),
+document.getElementById("evo-tier-2"),
+document.getElementById("evo-tier-3"),
+document.getElementById("evo-tier-4"),
+document.getElementById("evo-tier-5"),
+document.getElementById("evo-tier-6"),
+document.getElementById("evo-tier-7"),
+document.getElementById("evo-tier-8")
+];
+
+
+// ---------- CORE STATE ----------
+const state = {
+cookies: 0,
+totalCookies: 0,
+cookiesPerClickBase: 1,
+cookiesPerClickBonus: 0,
+cookiesPerSecond: 0,
+combo: 1,
+comboCharge: 0,
+comboMax: 100,
+lastClickTime: 0,
+prestige: 0,
+prestigeMultiplier: 1,
+evolutionTier: 1,
+generators: {},
+upgradesBought: {},
+achievementsUnlocked: {},
+musicMode: Game.musicMode || "cosmic",
+isAdmin: Game.isAdmin || false,
+boss: {
+active: false,
+hp: 0,
+maxHp: 0,
+rewardMult: 0,
+name: ""
+},
+inventory: [],
+skills: {},
+secretCodesUsed: {}
+};
+
+
+// Expose for debugging if you want
+Game._state = state;
+
+
+// ---------- EVOLUTION TIERS ----------
+const EVOLUTION_TIERS = [
+{ tier: 1, name: "Tier 1 — Crumb", requirement: 0 },
+{ tier: 2, name: "Tier 2 — Basic Cookie", requirement: 100 },
+{ tier: 3, name: "Tier 3 — Cyber Cookie", requirement: 1000 },
+{ tier: 4, name: "Tier 4 — Quantum Cookie", requirement: 10000 },
+{ tier: 5, name: "Tier 5 — Galactic Cookie", requirement: 100000 },
+{ tier: 6, name: "Tier 6 — Singularity Cookie", requirement: 1000000 },
+{ tier: 7, name: "Tier 7 — God Cookie", requirement: 10000000 },
+{ tier: 8, name: "Tier 8 — Omega Cookie", requirement: 100000000 }
+];
+
+
+// ---------- GENERATORS (BUILDINGS) ----------
+const GENERATORS = [
+{
+id: "cursor",
+name: "Cursor",
+desc: "A basic auto-clicker.",
+baseCost: 15,
+baseCps: 0.1,
+icon: "🖱️"
+},
+{
+id: "grandma",
+name: "Grandma",
+desc: "Bakes cookies with love.",
+baseCost: 100,
+baseCps: 1,
+icon: "👵"
+},
+{
+id: "farm",
+name: "Cookie Farm",
+desc: "Grows cookie plants.",
+baseCost: 1100,
+baseCps: 8,
+icon: "🌾"
+},
+{
+id: "factory",
+name: "Factory",
+desc: "Mass-produces cookies.",
+baseCost: 13000,
+baseCps: 47,
+icon: "🏭"
+},
+{
+id: "portal",
+name: "Cosmic Portal",
+desc: "Pulls cookies from other realities.",
+baseCost: 50000,
+baseCps: 260,
+icon: "🌀"
+},
+{
+id: "lab",
+name: "Quantum Lab",
+desc: "Optimizes cookie physics.",
+baseCost: 200000,
+baseCps: 1400,
+icon: "🔬"
+},
+{
+id: "core",
+name: "Omega Core",
+desc: "A singularity of cookie energy.",
+baseCost: 1000000,
+baseCps: 7800,
+icon: "⚛️"
+}
+];
+
+
+// ---------- UPGRADES (WITH ICONS / RARITY) ----------
+const UPGRADES = [
+{
+id: "click1",
+name: "Reinforced Dough",
+desc: "+1 cookie per click.",
+cost: 50,
+rarity: "common",
+icon: "🥖",
+apply: () => { state.cookiesPerClickBonus += 1; }
+},
+{
+id: "click2",
+name: "Cyber Cursor",
+desc: "+5 cookies per click.",
+cost: 500,
+rarity: "rare",
+icon: "🖱️",
+apply: () => { state.cookiesPerClickBonus += 5; }
+},
+{
+id: "click3",
+name: "Quantum Tap",
+desc: "+25 cookies per click.",
+cost: 5000,
+rarity: "epic",
+icon: "⚡",
+apply: () => { state.cookiesPerClickBonus += 25; }
+},
+{
+id: "combo1",
+name: "Combo Stabilizer",
+desc: "Combo decays slower.",
+cost: 1000,
+rarity: "rare",
+icon: "📈",
+apply: () => { state.comboMax = 150; }
+},
+{
+id: "cps1",
+name: "Neon Efficiency",
+desc: "+20% generator output.",
+cost: 5000,
+rarity: "rare",
+icon: "💡",
+apply: () => { state.prestigeMultiplier += 0.2; recalcCps(); }
+},
+{
+id: "evoBoost",
+name: "Evolution Catalyst",
+desc: "Evolution thresholds -25%.",
+cost: 20000,
+rarity: "epic",
+icon: "🧬",
+apply: () => {
+EVOLUTION_TIERS.forEach(t => t.requirement = Math.floor(t.requirement * 0.75));
+}
+},
+{
+id: "grandma1",
+name: "Steel Rolling Pins",
+desc: "Grandmas bake 2x faster.",
+cost: 5000,
+rarity: "rare",
+icon: "🥐",
+apply: () => {
+const g = getGeneratorState("grandma");
+g.mult = (g.mult || 1) * 2;
+recalcCps();
+}
+},
+{
+id: "portal1",
+name: "Stabilized Wormholes",
+desc: "Portals produce 2x cookies.",
+cost: 50000,
+rarity: "epic",
+icon: "🌀",
+apply: () => {
+const g = getGeneratorState("portal");
+g.mult = (g.mult || 1) * 2;
+recalcCps();
+}
+},
+{
+id: "core1",
+name: "Omega Overclock",
+desc: "Omega Core output +50%.",
+cost: 250000,
+rarity: "legendary",
+icon: "🔥",
+apply: () => {
+const g = getGeneratorState("core");
+g.mult = (g.mult || 1) * 1.5;
+recalcCps();
+}
+},
+{
+id: "click4",
+name: "Prismatic Fingers",
+desc: "+100 cookies per click.",
+cost: 100000,
+rarity: "epic",
+icon: "🌈",
+apply: () => { state.cookiesPerClickBonus += 100; }
+},
+{
+id: "click5",
+name: "Singularity Knuckle",
+desc: "+500 cookies per click.",
+cost: 2500000,
+rarity: "legendary",
+icon: "🪐",
+apply: () => { state.cookiesPerClickBonus += 500; }
+},
+{
+id: "cps2",
+name: "Antimatter Oven",
+desc: "+50% total cookie production.",
+cost: 75000,
+rarity: "epic",
+icon: "♨️",
+apply: () => { state.prestigeMultiplier *= 1.5; recalcCps(); }
+},
+{
+id: "grandma2",
+name: "Grandma Clone Lab",
+desc: "Grandmas bake 3x faster again.",
+cost: 150000,
+rarity: "epic",
+icon: "🧪",
+apply: () => { const g = getGeneratorState("grandma"); g.mult = (g.mult || 1) * 3; recalcCps(); }
+},
+{
+id: "farm1",
+name: "Enchanted Soil",
+desc: "Cookie Farms produce 2x cookies.",
+cost: 30000,
+rarity: "rare",
+icon: "🌱",
+apply: () => { const g = getGeneratorState("farm"); g.mult = (g.mult || 1) * 2; recalcCps(); }
+},
+{
+id: "factory1",
+name: "Nanobot Assembly Line",
+desc: "Factories produce 2x cookies.",
+cost: 125000,
+rarity: "epic",
+icon: "🤖",
+apply: () => { const g = getGeneratorState("factory"); g.mult = (g.mult || 1) * 2; recalcCps(); }
+},
+{
+id: "lab1",
+name: "Infinite Research Grant",
+desc: "Quantum Labs produce 2x cookies.",
+cost: 500000,
+rarity: "legendary",
+icon: "🔭",
+apply: () => { const g = getGeneratorState("lab"); g.mult = (g.mult || 1) * 2; recalcCps(); }
+},
+{
+id: "click6",
+name: "Chrono Crumb Gloves",
+desc: "+2,500 cookies per click.",
+cost: 25000000,
+rarity: "legendary",
+icon: "🧤",
+apply: () => { state.cookiesPerClickBonus += 2500; }
+},
+{
+id: "cps3",
+name: "Dark Matter Dough",
+desc: "Doubles all cookie production.",
+cost: 10000000,
+rarity: "legendary",
+icon: "🌑",
+apply: () => { state.prestigeMultiplier *= 2; recalcCps(); }
+},
+{
+id: "portal2",
+name: "Multiverse Conveyor",
+desc: "Portals produce 5x cookies.",
+cost: 5000000,
+rarity: "legendary",
+icon: "🛸",
+apply: () => { const g = getGeneratorState("portal"); g.mult = (g.mult || 1) * 5; recalcCps(); }
+},
+{
+id: "core2",
+name: "Omega Singularity Lens",
+desc: "Omega Cores produce 3x cookies.",
+cost: 25000000,
+rarity: "legendary",
+icon: "🔮",
+apply: () => { const g = getGeneratorState("core"); g.mult = (g.mult || 1) * 3; recalcCps(); }
+},
+{
+id: "combo2",
+name: "Hypercombo Engine",
+desc: "Combo charge lasts much longer.",
+cost: 750000,
+rarity: "epic",
+icon: "💫",
+apply: () => { state.comboMax = 300; }
+},
+{
+id: "click7",
+name: "Reality-Bending Tap",
+desc: "+25,000 cookies per click.",
+cost: 250000000,
+rarity: "legendary",
+icon: "🌀",
+apply: () => { state.cookiesPerClickBonus += 25000; }
+}
+];
+
+
+// ---------- ACHIEVEMENTS ----------
+const ACHIEVEMENTS = [
+{ id: "cookies_1k", name: "First Batch", desc: "Bake 1,000 cookies.", icon: "🥠", condition: s => s.totalCookies >= 1_000 },
+{ id: "cookies_100k", name: "Serious Baker", desc: "Bake 100,000 cookies.", icon: "🍪", condition: s => s.totalCookies >= 100_000 },
+{ id: "cookies_10m", name: "Cookie Tycoon", desc: "Bake 10,000,000 cookies.", icon: "🏰", condition: s => s.totalCookies >= 10_000_000 },
+{ id: "clicks_combo", name: "Combo Wizard", desc: "Reach combo x2.5.", icon: "✨", condition: s => s.combo >= 2.5 },
+{ id: "gen_10", name: "Industrialist", desc: "Own 10 factories.", icon: "🏭", condition: s => getGeneratorState("factory").count >= 10 },
+{ id: "prestige_1", name: "Ascendant", desc: "Prestige at least once.", icon: "🌌", condition: s => s.prestige >= 1 },
+{ id: "boss_1", name: "Boss Breaker", desc: "Defeat a cosmic boss.", icon: "💀", condition: s => s._bossesDefeated >= 1 }
+];
+
+
+// ---------- SIMPLE MUSIC SYSTEM ----------
+let audioCtx = null;
+let musicInterval = null;
+
+
+function initAudio() {
+if (audioCtx) return;
+try {
+audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+} catch (e) {
+console.warn("AudioContext not available.");
+}
+}
+
+
+function stopMusic() {
+if (musicInterval) {
+clearInterval(musicInterval);
+musicInterval = null;
+}
+}
+
+
+function playPattern(type) {
+if (!audioCtx) return;
+stopMusic();
+if (type === "cosmic") {
+musicInterval = setInterval(() => {
+const osc = audioCtx.createOscillator();
+const gain = audioCtx.createGain();
+osc.type = "sine";
+osc.frequency.value = 120 + Math.random() * 40;
+gain.gain.value = 0.02;
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+osc.start();
+osc.stop(audioCtx.currentTime + 1.5);
+}, 2000);
+} else if (type === "synthwave") {
+musicInterval = setInterval(() => {
+const osc = audioCtx.createOscillator();
+const gain = audioCtx.createGain();
+osc.type = "square";
+osc.frequency.value = 80 + Math.random() * 40;
+gain.gain.value = 0.03;
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+osc.start();
+osc.stop(audioCtx.currentTime + 0.4);
+}, 600);
+}
+}
+
+
+function updateMusicMode(mode) {
+state.musicMode = mode;
+Game.musicMode = mode;
+musicModeDisplay.textContent =
+"Music: " + (mode === "cosmic" ? "Cosmic Ambient" : mode === "synthwave" ? "Synthwave" : "Off");
+if (!audioCtx && mode !== "off") initAudio();
+if (!audioCtx) return;
+if (mode === "off") stopMusic();
+else playPattern(mode);
+}
+
+
+// ---------- EVOLUTION ----------
+function updateEvolutionTier() {
+let newTier = state.evolutionTier;
+for (const t of EVOLUTION_TIERS) {
+if (state.totalCookies >= t.requirement) {
+newTier = t.tier;
+}
+}
+if (newTier !== state.evolutionTier) {
+state.evolutionTier = newTier;
+const tierObj = EVOLUTION_TIERS.find(t => t.tier === newTier);
+if (tierObj) evolutionLabelEl.textContent = tierObj.name;
+evoAuras.forEach((el, idx) => {
+el.classList.toggle("visible", idx + 1 === newTier);
+});
+if (typeof Game.updatePortalForTier === "function") {
+Game.updatePortalForTier(newTier);
+}
+}
+}
+
+
+// ---------- CLICKING ----------
+function spawnFloatingText(text, x, y) {
+const rect = floatingClicksEl.getBoundingClientRect();
+const el = document.createElement("div");
+el.className = "float-text";
+el.textContent = text;
+el.style.left = (x - rect.left - 10) + "px";
+el.style.top = (y - rect.top - 10) + "px";
+floatingClicksEl.appendChild(el);
+setTimeout(() => el.remove(), 700);
+}
+
+
+function getCookiesPerClick() {
+return (state.cookiesPerClickBase + state.cookiesPerClickBonus) * state.combo;
+}
+
+
+function handleCookieClick(e) {
+const now = performance.now();
+const delta = now - state.lastClickTime;
+state.lastClickTime = now;
+
+
+// Combo charge
+state.comboCharge = Math.min(state.comboMax, state.comboCharge + 8);
+state.combo = 1 + (state.comboCharge / state.comboMax) * 1.5;
+
+
+const gain = getCookiesPerClick();
+state.cookies += gain;
+state.totalCookies += gain;
+
+
+// If boss active, deal damage
+if (state.boss.active) {
+const dmg = Math.max(1, Math.floor(gain));
+state.boss.hp = Math.max(0, state.boss.hp - dmg);
+if (state.boss.hp <= 0) {
+finishBossFight(true);
+}
+}
+
+
+spawnFloatingText("+" + Math.round(gain), e.clientX, e.clientY);
+updateEvolutionTier();
+updateStatsUI();
+checkAchievements();
+}
+
+
+// ---------- GENERATORS & CPS ----------
+function getGeneratorState(id) {
+if (!state.generators[id]) {
+state.generators[id] = { count: 0, level: 1, mult: 1 };
+}
+return state.generators[id];
+}
+
+
+function getGeneratorCost(gen, gState) {
+return Math.floor(gen.baseCost * Math.pow(1.15, gState.count));
+}
+
+
+function getGeneratorCps(gen, gState) {
+return gen.baseCps * gState.count * (gState.mult || 1) * state.prestigeMultiplier;
+}
+
+
+function recalcCps() {
+let cps = 0;
+for (const gen of GENERATORS) {
+const gState = getGeneratorState(gen.id);
+cps += getGeneratorCps(gen, gState);
+}
+state.cookiesPerSecond = cps;
+}
+
+
+function tick(dt) {
+const gain = state.cookiesPerSecond * dt;
+state.cookies += gain;
+state.totalCookies += gain;
+
+
+// Combo decay
+if (state.comboCharge > 0) {
+state.comboCharge = Math.max(0, state.comboCharge - dt * 10);
+state.combo = 1 + (state.comboCharge / state.comboMax) * 1.5;
+} else {
+state.combo = 1;
+}
+
+
+// Boss soft timer (if you want to add later)
+updateEvolutionTier();
+updateStatsUI();
+checkAchievements();
+}
+
+
+// ---------- UI RENDER ----------
+function updateStatsUI() {
+cookieAmountEl.textContent = Math.floor(state.cookies).toLocaleString();
+statCookiesEl.textContent = Math.floor(state.cookies).toLocaleString();
+statCpsEl.textContent = state.cookiesPerSecond.toFixed(1);
+statComboEl.textContent = "x" + state.combo.toFixed(2);
+statPrestigeEl.textContent = state.prestige.toLocaleString();
+comboFillEl.style.width = (state.comboCharge / state.comboMax * 100).toFixed(1) + "%";
+comboTextEl.textContent = "x" + state.combo.toFixed(2);
+}
+
+
+function renderUpgrades() {
+upgradesContainer.innerHTML = "";
+for (const up of UPGRADES) {
+const bought = !!state.upgradesBought[up.id];
+const el = document.createElement("div");
+el.className = "upgrade" + (bought ? " disabled" : "");
+el.dataset.id = up.id;
+el.dataset.rarity = up.rarity || "common";
+
+
+el.innerHTML = `
+<div class="upgrade-left">
+<div class="upgrade-name">
+<span class="upgrade-icon">${up.icon || "★"}</span>
+${up.name}
+</div>
+<div class="upgrade-desc">${up.desc}</div>
+</div>
+<div class="upgrade-right">
+<div class="upgrade-cost">${up.cost.toLocaleString()} cookies</div>
+<div class="upgrade-meta">${bought ? "Purchased" : (up.rarity || "common")}</div>
+</div>
+`;
+
+
+if (!bought) {
+el.addEventListener("click", () => {
+if (state.cookies >= up.cost) {
+state.cookies -= up.cost;
+state.upgradesBought[up.id] = true;
+up.apply();
+recalcCps();
+updateStatsUI();
+renderUpgrades();
+saveGame();
+}
+});
+}
+
+
+upgradesContainer.appendChild(el);
+}
+}
+
+
+function renderGeneratorsTab() {
+rightContent.innerHTML = "";
+const title = document.createElement("div");
+title.className = "section-title";
+title.textContent = "Bots & Factories";
+rightContent.appendChild(title);
+
+
+for (const gen of GENERATORS) {
+const gState = getGeneratorState(gen.id);
+const cost = getGeneratorCost(gen, gState);
+const el = document.createElement("div");
+el.className = "generator";
+el.dataset.id = gen.id;
+
+
+el.innerHTML = `
+<div class="generator-left">
+<div class="generator-name">
+<span class="generator-icon">${gen.icon || "■"}</span>
+${gen.name}
+</div>
+<div class="generator-desc">${gen.desc}</div>
+</div>
+<div class="generator-right">
+<div class="generator-cost">${cost.toLocaleString()} cookies</div>
+<div class="generator-meta">
+${gState.count} owned — ${getGeneratorCps(gen, gState).toFixed(1)} cps
+</div>
+</div>
+`;
+
+
+el.addEventListener("click", () => {
+const gState2 = getGeneratorState(gen.id);
+const cost2 = getGeneratorCost(gen, gState2);
+if (state.cookies >= cost2) {
+state.cookies -= cost2;
+gState2.count++;
+recalcCps();
+updateStatsUI();
+renderGeneratorsTab();
+saveGame();
+}
+});
+
+
+rightContent.appendChild(el);
+}
+}
+
+
+function renderResearchTab() {
+rightContent.innerHTML = "";
+const title = document.createElement("div");
+title.className = "section-title";
+title.textContent = "Research Lab / Skill Tree";
+rightContent.appendChild(title);
+
+
+const info = document.createElement("div");
+info.style.fontSize = "11px";
+info.style.opacity = "0.85";
+info.innerHTML =
+"Prototype skill tree: unlock passive bonuses using your progress. (You can expand this later.)";
+rightContent.appendChild(info);
+
+
+const skills = [
+{ id: "skill_click", name: "Click Mastery", desc: "+10% click power.", icon: "🖱️", apply: () => { state.cookiesPerClickBase *= 1.1; } },
+{ id: "skill_cps", name: "Factory Mastery", desc: "+10% CPS.", icon: "🏭", apply: () => { state.prestigeMultiplier *= 1.1; recalcCps(); } },
+{ id: "skill_combo", name: "Combo Mastery", desc: "Combo charges faster.", icon: "⚡", apply: () => { state.comboMax += 50; } }
+];
+
+
+const list = document.createElement("div");
+list.style.marginTop = "6px";
+list.style.display = "flex";
+list.style.flexDirection = "column";
+list.style.gap = "4px";
+
+
+skills.forEach(sk => {
+const unlocked = !!state.skills[sk.id];
+const row = document.createElement("div");
+row.style.display = "flex";
+row.style.justifyContent = "space-between";
+row.style.alignItems = "center";
+row.style.padding = "4px 6px";
+row.style.borderRadius = "6px";
+row.style.background = "rgba(0, 188, 212, 0.12)";
+row.style.fontSize = "11px";
+row.style.cursor = unlocked ? "default" : "pointer";
+row.style.opacity = unlocked ? "0.5" : "1";
+
+
+row.innerHTML = `
+<div>
+<b>${sk.icon} ${sk.name}</b><br/>
+<span style="opacity:0.8;">${sk.desc}</span>
+</div>
+<div>${unlocked ? "Unlocked" : "Unlock"}</div>
+`;
+
+
+if (!unlocked) {
+row.addEventListener("click", () => {
+// Simple condition: total cookies threshold
+if (state.totalCookies < 10000) return;
+state.skills[sk.id] = true;
+sk.apply();
+renderResearchTab();
+updateStatsUI();
+saveGame();
+});
+}
+
+
+list.appendChild(row);
+});
+
+
+rightContent.appendChild(list);
+}
+
+
+function renderPrestigeTab() {
+rightContent.innerHTML = "";
+const title = document.createElement("div");
+title.className = "section-title";
+title.textContent = "Prestige";
+rightContent.appendChild(title);
+
+
+const info = document.createElement("div");
+info.id = "prestige-info";
+const potential = Math.floor(Math.sqrt(state.totalCookies / 1e6));
+info.innerHTML = `
+You can reset your bakery to gain <b>Prestige Shards</b>.<br/>
+Each shard increases generator output by <b>+10%</b> permanently.<br/><br/>
+Total cookies baked: ${Math.floor(state.totalCookies).toLocaleString()}<br/>
+Potential shards on reset: <b>${potential}</b>
+`;
+rightContent.appendChild(info);
+
+
+const btn = document.createElement("button");
+btn.id = "prestige-btn";
+btn.textContent = potential > 0 ? "Ascend & Gain " + potential + " Shards" : "Not enough cookies to ascend";
+btn.disabled = potential <= 0;
+btn.addEventListener("click", () => {
+if (potential <= 0) return;
+state.prestige += potential;
+state.prestigeMultiplier = 1 + state.prestige * 0.1;
+// Hard reset
+state.cookies = 0;
+state.totalCookies = 0;
+state.cookiesPerClickBase = 1;
+state.cookiesPerClickBonus = 0;
+state.generators = {};
+state.upgradesBought = {};
+state.combo = 1;
+state.comboCharge = 0;
+state.evolutionTier = 1;
+recalcCps();
+updateEvolutionTier();
+renderUpgrades();
+renderGeneratorsTab();
+renderPrestigeTab();
+updateStatsUI();
+saveGame();
+});
+rightContent.appendChild(btn);
+}
+
+
+// ---------- ACHIEVEMENTS UI ----------
+let achievementToastTimeout = null;
+
+
+function showAchievementToast(ach) {
+let toast = document.getElementById("achievement-toast");
+if (!toast) {
+toast = document.createElement("div");
+toast.id = "achievement-toast";
+toast.style.position = "fixed";
+toast.style.right = "16px";
+toast.style.bottom = "16px";
+toast.style.padding = "8px 12px";
+toast.style.borderRadius = "8px";
+toast.style.background = "rgba(0,0,0,0.85)";
+toast.style.color = "#fff";
+toast.style.fontSize = "12px";
+toast.style.boxShadow = "0 0 12px rgba(0,0,0,0.6)";
+toast.style.zIndex = "99999";
+document.body.appendChild(toast);
+}
+toast.innerHTML = `<b>${ach.icon} Achievement Unlocked!</b><br/>${ach.name} — ${ach.desc}`;
+toast.style.opacity = "1";
+if (achievementToastTimeout) clearTimeout(achievementToastTimeout);
+achievementToastTimeout = setTimeout(() => {
+toast.style.opacity = "0";
+}, 3000);
+}
+
+
+function checkAchievements() {
+for (const ach of ACHIEVEMENTS) {
+if (state.achievementsUnlocked[ach.id]) continue;
+if (ach.condition(state)) {
+state.achievementsUnlocked[ach.id] = true;
+state._bossesDefeated = state._bossesDefeated || 0;
+showAchievementToast(ach);
+saveGame();
+}
+}
+}
+
+
+function renderAchievementsTab() {
+rightContent.innerHTML = "";
+const title = document.createElement("div");
+title.className = "section-title";
+title.textContent = "Achievements";
+rightContent.appendChild(title);
+
+
+const list = document.createElement("div");
+list.style.marginTop = "6px";
+list.style.display = "flex";
+list.style.flexDirection = "column";
+list.style.gap = "4px";
+
+
+ACHIEVEMENTS.forEach(ach => {
+const unlocked = !!state.achievementsUnlocked[ach.id];
+const row = document.createElement("div");
+row.style.display = "flex";
+row.style.justifyContent = "space-between";
+row.style.alignItems = "center";
+row.style.padding = "4px 6px";
+row.style.borderRadius = "6px";
+row.style.background = unlocked ? "rgba(76, 175, 80, 0.2)" : "rgba(255, 255, 255, 0.05)";
+row.style.fontSize = "11px";
+row.style.opacity = unlocked ? "1" : "0.5";
+
+
+row.innerHTML = `
+<div>
+<b>${ach.icon} ${ach.name}</b><br/>
+<span style="opacity:0.8;">${ach.desc}</span>
+</div>
+<div>${unlocked ? "Unlocked" : "Locked"}</div>
+`;
+
+
+list.appendChild(row);
+});
+
+
+rightContent.appendChild(list);
+}
+
+
+// ---------- BOSS FIGHTS ----------
+function startBossFight() {
+if (state.boss.active) return;
+const hp = Math.max(1000, Math.floor(state.totalCookies * 0.1));
+state.boss.active = true;
+state.boss.maxHp = hp;
+state.boss.hp = hp;
+state.boss.rewardMult = 0.5 + Math.random() * 0.5;
+state.boss.name = "Cosmic Dough Titan";
+
+
+showBossOverlay();
+}
+
+
+function finishBossFight(victory) {
+if (!state.boss.active) return;
+if (victory) {
+const mult = 1 + state.boss.rewardMult;
+state.prestigeMultiplier *= mult;
+state._bossesDefeated = (state._bossesDefeated || 0) + 1;
+checkAchievements();
+}
+state.boss.active = false;
+hideBossOverlay();
+recalcCps();
+updateStatsUI();
+saveGame();
+}
+
+
+function showBossOverlay() {
+let overlay = document.getElementById("boss-overlay");
+if (!overlay) {
+overlay = document.createElement("div");
+overlay.id = "boss-overlay";
+overlay.style.position = "fixed";
+overlay.style.inset = "0";
+overlay.style.background = "rgba(0,0,0,0.8)";
+overlay.style.display = "flex";
+overlay.style.flexDirection = "column";
+overlay.style.alignItems = "center";
+overlay.style.justifyContent = "center";
+overlay.style.zIndex = "9999";
+overlay.style.color = "#fff";
+overlay.style.fontFamily = "system-ui, sans-serif";
+document.body.appendChild(overlay);
+}
+overlay.innerHTML = `
+<div style="text-align:center; max-width:320px;">
+<div style="font-size:18px; margin-bottom:6px;">${state.boss.name}</div>
+<div style="font-size:12px; opacity:0.8; margin-bottom:10px;">
+Click the cookie to damage the boss! Defeat it to gain a permanent CPS multiplier.
+</div>
+<div style="width:100%; height:12px; border-radius:999px; background:rgba(255,255,255,0.1); overflow:hidden; margin-bottom:6px;">
+<div id="boss-hp-bar" style="height:100%; width:100%; background:linear-gradient(90deg,#f44336,#ffeb3b);"></div>
+</div>
+<div id="boss-hp-text" style="font-size:11px;"></div>
+<button id="boss-flee-btn" style="margin-top:10px; padding:4px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.4); background:rgba(0,0,0,0.6); color:#fff; font-size:11px; cursor:pointer;">
+Flee (no reward)
+</button>
+</div>
+`;
+const fleeBtn = document.getElementById("boss-flee-btn");
+fleeBtn.onclick = () => finishBossFight(false);
+updateBossOverlay();
+}
+
+
+function hideBossOverlay() {
+const overlay = document.getElementById("boss-overlay");
+if (overlay) overlay.remove();
+}
+
+
+function updateBossOverlay() {
+if (!state.boss.active) return;
+const bar = document.getElementById("boss-hp-bar");
+const txt = document.getElementById("boss-hp-text");
+if (!bar || !txt) return;
+const pct = (state.boss.hp / state.boss.maxHp) * 100;
+bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+txt.textContent = `${Math.floor(state.boss.hp).toLocaleString()} / ${Math.floor(state.boss.maxHp).toLocaleString()} HP`;
+}
+
+
+// Update boss overlay every frame-ish
+setInterval(updateBossOverlay, 100);
+
+
+// ---------- SECRET CODES ----------
+const SECRET_CODES = {
+"COOKIESTORM": state => {
+state.cookies += 1_000_000;
+state.totalCookies += 1_000_000;
+},
+"NEOBAKER": state => {
+state.cookiesPerClickBonus += 50;
+},
+"BOSSTIME": state => {
+startBossFight();
+}
+};
+
+
+function promptSecretCode() {
+const code = prompt("Enter secret code:");
+if (!code) return;
+const key = code.trim().toUpperCase();
+if (SECRET_CODES[key] && !state.secretCodesUsed[key]) {
+SECRET_CODES[key](state);
+state.secretCodesUsed[key] = true;
+recalcCps();
+updateStatsUI();
+saveGame();
+alert("Secret code accepted.");
+} else {
+alert("Invalid or already used code.");
+}
+}
+
+
+// ---------- ADMIN TAB ----------
+function renderAdminTab() {
+rightContent.innerHTML = "";
+const title = document.createElement("div");
+title.className = "section-title";
+title.textContent = "Admin Panel";
+rightContent.appendChild(title);
+
+
+const info = document.createElement("div");
+info.style.fontSize = "11px";
+info.style.opacity = "0.85";
+info.innerHTML =
+"Omega Bakery Core controls. Use with care — reality may fracture.";
+rightContent.appendChild(info);
+
+
+const controls = document.createElement("div");
+controls.style.marginTop = "8px";
+controls.style.display = "flex";
+controls.style.flexDirection = "column";
+controls.style.gap = "6px";
+
+
+function makeBtn(label, handler) {
+const b = document.createElement("button");
+b.textContent = label;
+b.style.padding = "4px 8px";
+b.style.borderRadius = "999px";
+b.style.border = "1px solid rgba(0, 229, 255, 0.7)";
+b.style.background = "rgba(0,0,0,0.6)";
+b.style.color = "#e0f7fa";
+b.style.fontSize = "11px";
+b.style.cursor = "pointer";
+b.addEventListener("click", handler);
+return b;
+}
+
+
+controls.appendChild(makeBtn("Give 1,000,000 cookies", () => {
+state.cookies += 1_000_000;
+state.totalCookies += 1_000_000;
+updateEvolutionTier();
+updateStatsUI();
+saveGame();
+}));
+
+
+controls.appendChild(makeBtn("Set evolution to Omega", () => {
+state.totalCookies = Math.max(state.totalCookies, 1e8);
+updateEvolutionTier();
+updateStatsUI();
+saveGame();
+}));
+
+
+controls.appendChild(makeBtn("Toggle INSANE MODE (x10 CPS)", () => {
+if (!state._insaneMode) {
+state._insaneMode = true;
+state._prevPrestigeMult = state.prestigeMultiplier;
+state.prestigeMultiplier *= 10;
+} else {
+state._insaneMode = false;
+state.prestigeMultiplier = state._prevPrestigeMult || 1;
+}
+recalcCps();
+updateStatsUI();
+renderGeneratorsTab();
+saveGame();
+}));
+
+
+controls.appendChild(makeBtn("Unlock all upgrades", () => {
+for (const up of UPGRADES) {
+if (!state.upgradesBought[up.id]) {
+state.upgradesBought[up.id] = true;
+up.apply();
+}
+}
+recalcCps();
+updateStatsUI();
+renderUpgrades();
+saveGame();
+}));
+
+
+controls.appendChild(makeBtn("Switch Music Mode", () => {
+const modes = ["cosmic", "synthwave", "off"];
+const idx = modes.indexOf(state.musicMode);
+const next = modes[(idx + 1) % modes.length];
+updateMusicMode(next);
+saveGame();
+}));
+
+
+controls.appendChild(makeBtn("Start Boss Fight", () => {
+startBossFight();
+}));
+
+
+controls.appendChild(makeBtn("Enter Secret Code", () => {
+promptSecretCode();
+}));
+
+
+rightContent.appendChild(controls);
+}
+
+
+// ---------- ONLINE PLAYER TRADING (SERVER WALLET) ----------
+// Configure Game.tradingApiBase to your deployed HTTPS API URL.
+// Online trades use server-managed wallets; local cookies are not treated as authoritative.
+function renderTradingTab() {
+  rightContent.innerHTML = "";
+  const title = document.createElement("div");
+  title.className = "section-title";
+  title.textContent = "🌐 Online Trading Exchange";
+  rightContent.appendChild(title);
+
+  const note = document.createElement("div");
+  note.className = "trading-card";
+  note.innerHTML = `<strong>Server-secured player exchange</strong><p class="trading-status">Create an account or sign in to use your online wallet. Trades use server-held balances and are processed by the backend.</p>`;
+  rightContent.appendChild(note);
+
+  const status = document.createElement("p");
+  status.className = "trading-status";
+  rightContent.appendChild(status);
+
+  const base = String(Game.tradingApiBase || "").replace(/\/$/, "");
+  const tokenKey = "cc2_trade_token_v1";
+  const token = () => sessionStorage.getItem(tokenKey) || "";
+  async function api(path, options = {}) {
+    if (!base) throw new Error("Online trading server isn't configured yet. Set Game.tradingApiBase in the game source after deploying the backend.");
+    const response = await fetch(base + path, {
+      ...options,
+      headers: { "Content-Type": "application/json", ...(token() ? { "Authorization": "Bearer " + token() } : {}), ...(options.headers || {}) }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Server error (${response.status})`);
+    return data;
+  }
+
+  const account = document.createElement("div");
+  account.className = "trading-card";
+  rightContent.appendChild(account);
+  const offersBox = document.createElement("div");
+  offersBox.className = "trading-card";
+  rightContent.appendChild(offersBox);
+
+  function field(labelText, placeholder, type = "text") {
+    const label = document.createElement("label"); label.textContent = labelText; account.appendChild(label);
+    const input = document.createElement("input"); input.placeholder = placeholder; input.type = type; input.autocomplete = "off"; input.style.width = "100%"; account.appendChild(input);
+    return input;
+  }
+  function button(text, onClick) {
+    const b = document.createElement("button"); b.className = "tab-btn"; b.style.width = "100%"; b.textContent = text; b.addEventListener("click", onClick); account.appendChild(b); return b;
+  }
+  const username = field("Online account name", "Choose a name (3–24 characters)");
+  const password = field("Password", "Use a unique password", "password");
+  const loginBtn = button("Sign in", async () => {
+    try { loginBtn.disabled = true; const d = await api("/auth/login", {method:"POST", body:JSON.stringify({username:username.value.trim(),password:password.value})}); sessionStorage.setItem(tokenKey,d.token); status.textContent="Signed in securely."; await renderWallet(); }
+    catch(e){status.textContent=e.message;} finally{loginBtn.disabled=false;}
+  });
+  button("Create account", async () => {
+    try { const d = await api("/auth/register", {method:"POST", body:JSON.stringify({username:username.value.trim(),password:password.value})}); sessionStorage.setItem(tokenKey,d.token); status.textContent="Account created and signed in."; await renderWallet(); }
+    catch(e){status.textContent=e.message;}
+  });
+
+  async function renderWallet() {
+    if (!token()) { offersBox.textContent = "Sign in to view your online wallet and offers."; return; }
+    try {
+      const wallet = await api("/wallet");
+      account.innerHTML = "";
+      const bal = document.createElement("p"); bal.className="trading-status"; bal.textContent=`Online wallet: ${Number(wallet.cookies).toLocaleString()} cookies`; account.appendChild(bal);
+      const target = field("Trade with account", "Friend's exact online username");
+      const offer = field("Cookies to offer", "Whole number", "number"); offer.min="1";
+      const request = field("Cookies requested", "0 for a gift", "number"); request.min="0";
+      button("Send offer", async () => {
+        try {
+          const offerCookies=Number(offer.value), requestCookies=Number(request.value);
+          if (!Number.isSafeInteger(offerCookies)||offerCookies<1||!Number.isSafeInteger(requestCookies)||requestCookies<0) throw new Error("Enter valid whole-number amounts.");
+          await api("/trades",{method:"POST",body:JSON.stringify({toName:target.value.trim(),offerCookies,requestCookies})});
+          status.textContent="Offer sent. Offered cookies are reserved by the server."; await renderWallet();
+        } catch(e){status.textContent=e.message;}
+      });
+      button("Refresh wallet & offers", renderWallet);
+      button("Sign out", () => {sessionStorage.removeItem(tokenKey); status.textContent="Signed out."; renderTradingTab();});
+      const data = await api("/trades");
+      offersBox.innerHTML = "<strong>Trade offers</strong>";
+      const items = Array.isArray(data.trades)?data.trades:[];
+      if (!items.length) { const p=document.createElement("p");p.className="trading-status";p.textContent="No pending or recent offers.";offersBox.appendChild(p); }
+      for (const t of items) {
+        const card=document.createElement("div");card.className="trading-card";
+        const p=document.createElement("p");p.className="trading-status";
+        p.textContent=`${t.fromName} → ${t.toName}: offer ${Number(t.offerCookies).toLocaleString()} cookies, request ${Number(t.requestCookies).toLocaleString()} · ${t.status}`;
+        card.appendChild(p);
+        if(t.status==="pending" && t.toName.toLowerCase()===String(wallet.username).toLowerCase()){
+          for(const action of ["accept","decline"]){const b=document.createElement("button");b.className="tab-btn";b.textContent=action==="accept"?"Accept trade":"Decline";b.addEventListener("click",async()=>{try{await api(`/trades/${encodeURIComponent(t.id)}/${action}`,{method:"POST"});status.textContent=`Trade ${action}ed.`;await renderWallet();}catch(e){status.textContent=e.message;}});card.appendChild(b);}
+        }
+        offersBox.appendChild(card);
+      }
+    } catch(e){status.textContent=e.message;}
+  }
+
+  if (!base) status.textContent = "Backend not configured. The offline NPC market below still works; online trading activates after you deploy the included server and set Game.tradingApiBase.";
+  else if (token()) renderWallet().catch(e=>status.textContent=e.message);
+  else offersBox.textContent = "Create an online account or sign in to access your server wallet.";
+
+  // Offline NPC barter market remains available independently of the online backend.
+  const botTitle = document.createElement("div"); botTitle.className="section-title"; botTitle.textContent="🤖 Offline Bot Barter Market"; rightContent.appendChild(botTitle);
+  const botDeals = [
+    {id:"crumb_crate",bot:"Crumb Trader",icon:"📦",name:"Mystery Crumb Crate",cost:5000,description:"Permanently adds +5 cookies per click.",reward:()=>{state.cookiesPerClickBonus=(state.cookiesPerClickBonus||0)+5;}},
+    {id:"golden_yeast",bot:"Professor Yeast",icon:"🧪",name:"Golden Yeast",cost:25000,description:"Permanently multiplies production by 1.15.",reward:()=>{state.prestigeMultiplier=(state.prestigeMultiplier||1)*1.15;recalcCps();}},
+    {id:"quantum_chip",bot:"Quantum Bot Q-8",icon:"💠",name:"Quantum Chip",cost:100000,description:"Adds +25 cookies per click.",reward:()=>{state.cookiesPerClickBonus=(state.cookiesPerClickBonus||0)+25;}},
+    {id:"star_oven",bot:"Nebula Merchant",icon:"🌟",name:"Starforge Oven",cost:500000,description:"Doubles your production multiplier.",reward:()=>{state.prestigeMultiplier=(state.prestigeMultiplier||1)*2;recalcCps();}},
+    {id:"omega_core",bot:"OMEGA-TRADE",icon:"⚛️",name:"Mini Omega Core",cost:2500000,description:"Adds +100 cookies per click and a 1.5× production boost.",reward:()=>{state.cookiesPerClickBonus=(state.cookiesPerClickBonus||0)+100;state.prestigeMultiplier=(state.prestigeMultiplier||1)*1.5;recalcCps();}}
+  ];
+  for(const deal of botDeals){
+    const card=document.createElement("div");card.className="trading-card";
+    const h=document.createElement("strong");h.textContent=`${deal.icon} ${deal.name}`;card.appendChild(h);
+    const p=document.createElement("p");p.className="trading-status";p.textContent=`Trader: ${deal.bot} · Price: ${deal.cost.toLocaleString()} local cookies`;card.appendChild(p);
+    const d=document.createElement("p");d.className="trading-status";d.textContent=deal.description;card.appendChild(d);
+    const b=document.createElement("button");b.className="tab-btn";b.style.width="100%";
+    const key="_botTrade_"+deal.id;b.textContent=state[key]?"Purchased":`Trade ${deal.cost.toLocaleString()} cookies`;b.disabled=!!state[key]||state.cookies<deal.cost;
+    b.addEventListener("click",()=>{if(state[key]||state.cookies<deal.cost)return;state.cookies-=deal.cost;state[key]=true;deal.reward();saveGame();updateStatsUI();renderTradingTab();});
+    card.appendChild(b);rightContent.appendChild(card);
+  }
+}
+
+// ---------- QUESTS, DAILY REWARD & GOLDEN COOKIE ----------
+const QUESTS = [
+  { id: "quest_clicks", name: "Cookie Tapper", desc: "Bake 500 cookies by clicking.", target: 500, reward: 1200, progress: () => state._clickedCookies || 0 },
+  { id: "quest_saver", name: "First Fortune", desc: "Have 10,000 cookies at once.", target: 10000, reward: 2500, progress: () => state.cookies },
+  { id: "quest_factory", name: "Automation Nation", desc: "Own 5 factories.", target: 5, reward: 12000, progress: () => getGeneratorState("factory").count },
+  { id: "quest_bake", name: "Cosmic Bakery", desc: "Bake 100,000 cookies total.", target: 100000, reward: 20000, progress: () => state.totalCookies }
+];
+
+function renderQuestsTab() {
+  rightContent.innerHTML = "";
+  const title = document.createElement("div");
+  title.className = "section-title";
+  title.textContent = "📜 Quests & Rewards";
+  rightContent.appendChild(title);
+
+  const daily = document.createElement("div");
+  daily.className = "trading-card";
+  const last = localStorage.getItem("cc2_daily_claim_" + (Game.playerName || "guest"));
+  const today = new Date().toISOString().slice(0, 10);
+  const claimed = last === today;
+  daily.innerHTML = `<strong>🎁 Daily Login Crate</strong><p class="trading-status">Claim 2,500 cookies plus a bonus based on your progress once per day.</p>`;
+  const dailyBtn = document.createElement("button");
+  dailyBtn.className = "tab-btn";
+  dailyBtn.style.width = "100%";
+  dailyBtn.disabled = claimed;
+  dailyBtn.textContent = claimed ? "Today's crate claimed" : "Claim Daily Crate";
+  dailyBtn.onclick = () => {
+    if (localStorage.getItem("cc2_daily_claim_" + (Game.playerName || "guest")) === today) return;
+    const bonus = Math.min(1000000, Math.floor(Math.max(0, state.totalCookies) * 0.01));
+    state.cookies += 2500 + bonus;
+    state.totalCookies += 2500 + bonus;
+    localStorage.setItem("cc2_daily_claim_" + (Game.playerName || "guest"), today);
+    saveGame(); updateStatsUI(); renderQuestsTab();
+  };
+  daily.appendChild(dailyBtn);
+  rightContent.appendChild(daily);
+
+  for (const q of QUESTS) {
+    const completed = !!state._questDone?.[q.id];
+    const progress = Math.min(q.target, Math.floor(q.progress()));
+    const card = document.createElement("div");
+    card.className = "trading-card";
+    const heading = document.createElement("strong");
+    heading.textContent = `${completed ? "✅" : "📌"} ${q.name}`;
+    card.appendChild(heading);
+    const desc = document.createElement("p"); desc.className = "trading-status";
+    desc.textContent = `${q.desc} Progress: ${progress.toLocaleString()} / ${q.target.toLocaleString()}`;
+    card.appendChild(desc);
+    const btn = document.createElement("button"); btn.className = "tab-btn"; btn.style.width = "100%";
+    btn.textContent = completed ? "Reward claimed" : `Claim ${q.reward.toLocaleString()} cookies`;
+    btn.disabled = completed || progress < q.target;
+    btn.onclick = () => {
+      if (state._questDone?.[q.id] || q.progress() < q.target) return;
+      state._questDone = state._questDone || {}; state._questDone[q.id] = true;
+      state.cookies += q.reward; state.totalCookies += q.reward;
+      saveGame(); updateStatsUI(); renderQuestsTab();
+    };
+    card.appendChild(btn); rightContent.appendChild(card);
+  }
+}
+
+function spawnGoldenCookie() {
+  if (document.getElementById("golden-cookie-event") || !document.getElementById("game-root") || document.getElementById("game-root").style.display === "none") return;
+  const el = document.createElement("button");
+  el.id = "golden-cookie-event";
+  el.textContent = "✨🍪✨";
+  el.title = "Click for a surprise cookie bonus!";
+  el.style.cssText = "position:fixed;z-index:9998;right:24px;top:24%;font-size:34px;border:2px solid #ffe082;border-radius:50%;padding:12px;background:radial-gradient(circle,#fff59d,#ff9800);cursor:pointer;box-shadow:0 0 24px #ffca28;animation:goldPulse 1s infinite alternate";
+  el.onclick = () => {
+    const reward = Math.max(100, Math.floor(state.cookiesPerSecond * 60 + (state.cookiesPerClickBase + state.cookiesPerClickBonus) * 25));
+    state.cookies += reward; state.totalCookies += reward;
+    state.comboCharge = Math.min(state.comboMax, state.comboCharge + 30);
+    el.remove();
+    const toast = document.createElement("div");
+    toast.textContent = `GOLDEN COOKIE! +${reward.toLocaleString()} cookies`;
+    toast.style.cssText = "position:fixed;z-index:9999;top:16%;left:50%;transform:translateX(-50%);padding:12px 18px;border-radius:12px;background:#ffca28;color:#222;font-weight:900;box-shadow:0 0 20px #ffca28";
+    document.body.appendChild(toast); setTimeout(() => toast.remove(), 2400);
+    saveGame(); updateStatsUI();
+  };
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 12000);
+}
+
+if (!document.getElementById("golden-cookie-style")) {
+  const style = document.createElement("style"); style.id = "golden-cookie-style";
+  style.textContent = "@keyframes goldPulse{from{transform:scale(1) rotate(-5deg)}to{transform:scale(1.12) rotate(5deg)}}";
+  document.head.appendChild(style);
+}
+
+// ---------- TABS ----------
+function setActiveTab(tabId) {
+tabButtons.forEach(btn => {
+btn.classList.toggle("active", btn.dataset.tab === tabId);
+});
+if (tabId === "generators") renderGeneratorsTab();
+else if (tabId === "research") renderResearchTab();
+else if (tabId === "prestige") renderPrestigeTab();
+else if (tabId === "trading") renderTradingTab();
+else if (tabId === "quests") renderQuestsTab();
+else if (tabId === "admin") renderAdminTab();
+else if (tabId === "achievements") renderAchievementsTab();
+}
+
+
+tabButtons.forEach(btn => {
+btn.addEventListener("click", () => {
+setActiveTab(btn.dataset.tab);
+});
+});
+
+
+// Add Achievements tab button dynamically
+(function addAchievementsTabButton() {
+const rightTabs = document.getElementById("right-tabs");
+if (!rightTabs) return;
+const btn = document.createElement("button");
+btn.className = "tab-btn";
+btn.dataset.tab = "achievements";
+btn.textContent = "Achievements";
+rightTabs.insertBefore(btn, rightTabs.lastElementChild); // before Admin
+ tabButtons.push(btn);
+ btn.addEventListener("click", () => setActiveTab("achievements"));
+ const questBtn = document.createElement("button");
+ questBtn.className = "tab-btn"; questBtn.dataset.tab = "quests"; questBtn.textContent = "Quests";
+ rightTabs.insertBefore(questBtn, rightTabs.lastElementChild);
+ tabButtons.push(questBtn);
+ questBtn.addEventListener("click", () => setActiveTab("quests"));
+})();
+
+
+// ---------- SAVE / LOAD ----------
+const SAVE_KEY = "cookie_clicker_2_evolution_protocol_v2";
+
+
+function saveGame() {
+try {
+const data = {
+cookies: state.cookies,
+totalCookies: state.totalCookies,
+cookiesPerClickBase: state.cookiesPerClickBase,
+cookiesPerClickBonus: state.cookiesPerClickBonus,
+prestige: state.prestige,
+prestigeMultiplier: state.prestigeMultiplier,
+generators: state.generators,
+upgradesBought: state.upgradesBought,
+achievementsUnlocked: state.achievementsUnlocked,
+musicMode: state.musicMode,
+skills: state.skills,
+secretCodesUsed: state.secretCodesUsed,
+botTrades: Object.fromEntries(Object.keys(state).filter(k => k.startsWith("_botTrade_")).map(k => [k, state[k]])),
+clickedCookies: state._clickedCookies || 0,
+questDone: state._questDone || {},
+bossesDefeated: state._bossesDefeated || 0
+};
+localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+} catch (e) {
+console.warn("Save failed:", e);
+}
+}
+
+
+function loadGame() {
+try {
+const raw = localStorage.getItem(SAVE_KEY);
+if (!raw) return;
+const data = JSON.parse(raw);
+Object.assign(state, {
+cookies: data.cookies || 0,
+totalCookies: data.totalCookies || 0,
+cookiesPerClickBase: data.cookiesPerClickBase || 1,
+cookiesPerClickBonus: data.cookiesPerClickBonus || 0,
+prestige: data.prestige || 0,
+prestigeMultiplier: data.prestigeMultiplier || 1,
+generators: data.generators || {},
+upgradesBought: data.upgradesBought || {},
+achievementsUnlocked: data.achievementsUnlocked || {},
+musicMode: data.musicMode || "cosmic",
+skills: data.skills || {},
+secretCodesUsed: data.secretCodesUsed || {},
+_bossesDefeated: data.bossesDefeated || 0,
+_clickedCookies: data.clickedCookies || 0,
+_questDone: data.questDone || {}
+});
+Object.assign(state, data.botTrades || {});
+Game.musicMode = state.musicMode;
+} catch (e) {
+console.warn("Load failed:", e);
+}
+}
+
+
+// ---------- MAIN LOOP ----------
+let lastFrameTime = performance.now();
+
+
+function loop(now) {
+const dt = (now - lastFrameTime) / 1000;
+lastFrameTime = now;
+tick(dt);
+if (Math.random() < 0.02) saveGame();
+requestAnimationFrame(loop);
+}
+
+
+// ---------- INIT ----------
+Game.initGame = function() {
+state.isAdmin = Game.isAdmin;
+if (state.isAdmin) {
+adminTab.style.display = "inline-block";
+}
+
+
+loadGame();
+recalcCps();
+updateEvolutionTier();
+renderUpgrades();
+setActiveTab("generators");
+updateStatsUI();
+updateMusicMode(state.musicMode || "cosmic");
+
+
+cookieEl.addEventListener("click", handleCookieClick);
+
+
+lastFrameTime = performance.now();
+requestAnimationFrame(loop);
+
+
+setInterval(saveGame, 15000);
+setInterval(() => { if (Math.random() < 0.72) spawnGoldenCookie(); }, 45000);
+};
+})();
+</script>
+
+
+
+
