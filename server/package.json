@@ -1,0 +1,20 @@
+{
+  "name": "cookie-clicker-2-evolution-protocol-trading",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Server-side accounts, wallets, and escrowed player trades for CC2 Evolution Protocol",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.7.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
